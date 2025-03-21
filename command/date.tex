@@ -2,6 +2,10 @@
 \msg_new:nnn { wudl } { invalid-input } { Invalid~ input:~ #1 }
 \msg_new:nnn { wudl } { no-format } { No~ date~ format~ specified. }
 
+% 定义用于逃逸标记的符号
+\tl_const:Nn \c__wudl_escape_begin_tl { \{ }
+\tl_const:Nn \c__wudl_escape_end_tl { \} }
+
 \cs_new:Npn \wudl_format_date:n #1
   { \__wudl_format_date:nw {#1} #1 ---\q_stop }
 \cs_new:Npn \__wudl_format_date:nw #1 #2 - #3 - #4 - #5\q_stop
@@ -34,11 +38,31 @@
   { \prg_replicate:nn { #2 - \tl_count:n {#1} } { 0 } #1 }
 \cs_generate_variant:Nn \__wudl_format_date_atleast_digits:nn { e }
 
+% 新增函数：获取序数后缀（st, nd, rd, th）的上标部分
+\cs_new:Npn \__wudl_format_date_ordinal_suffix:n #1
+{
+  \int_case:nnF { \int_mod:nn {#1} { 100 } }
+  {
+    { 11 } { \textsuperscript{th} }
+    { 12 } { \textsuperscript{th} }
+    { 13 } { \textsuperscript{th} }
+  }
+  {
+    \int_case:nnF { \int_mod:nn {#1} { 10 } }
+    {
+      { 1 } { \textsuperscript{st} }
+      { 2 } { \textsuperscript{nd} }
+      { 3 } { \textsuperscript{rd} }
+    }
+    { \textsuperscript{th} }
+  }
+}
+
 \seq_new:N \l__wudl_month_names_abbr_seq
 \seq_set_from_clist:Nn \l__wudl_month_names_abbr_seq
   {
-    Jan., Feb., Mar., Apr., May,  Jun.,
-    Jul., Aug., Sep., Oct., Nov., Dec.
+     Jan, Feb, Mar, Apr, May, Jun,
+     Jul, Aug, Sep, Oct, Nov, Dec
   }
 \cs_new:Npn \__wudl_format_date_mmm:n #1
   { \seq_item:Nn \l__wudl_month_names_abbr_seq {#1} }
@@ -52,13 +76,106 @@
   { \seq_item:Nn \l__wudl_month_names_seq {#1} }
 
 \tl_new:N \l__wudl_date_format_tl
+\tl_new:N \l__wudl_temp_format_tl
+
+% 新增函数：保留逃逸文本
+\cs_new:Npn \__wudl_escaped_text:n #1 { #1 }
+
+% 新增函数：处理逃逸字符，使用字符串替代而非正则表达式
+\cs_new_protected:Npn \__wudl_process_escapes:N #1
+{
+  \tl_set_eq:NN \l__wudl_temp_format_tl #1
+  \tl_clear:N #1
+  
+  \__wudl_parse_format:w \l__wudl_temp_format_tl \q_stop
+  
+  % 将结果存回原变量
+  \tl_set_eq:NN #1 \l__wudl_result_format_tl
+}
+
+% 新增临时变量
+\tl_new:N \l__wudl_result_format_tl
+\tl_new:N \l__wudl_current_segment_tl
+
+% 新增递归解析函数
+\cs_new_protected:Npn \__wudl_parse_format:w #1 \q_stop
+{
+  \tl_clear:N \l__wudl_result_format_tl
+  \tl_clear:N \l__wudl_current_segment_tl
+  \bool_set_false:N \l__wudl_in_escape_bool
+  
+  \__wudl_parse_char:w #1 \q_mark \q_stop
+}
+
+% 新增布尔值标记是否在逃逸字符内
+\bool_new:N \l__wudl_in_escape_bool
+
+% 新增字符解析函数
+\cs_new_protected:Npn \__wudl_parse_char:w #1 #2 \q_stop
+{
+  \tl_if_eq:nnTF {#1} {\q_mark}
+  { 
+    % 将最后剩余部分添加到结果中
+    \tl_put_right:Nx \l__wudl_result_format_tl { \l__wudl_current_segment_tl }
+  }
+  {
+    \tl_if_eq:nnTF {#1} { \c__wudl_escape_begin_tl }
+    {
+      % 如果遇到开始逃逸字符
+      \bool_if:NF \l__wudl_in_escape_bool
+      {
+        % 将当前段落添加到结果中
+        \tl_put_right:Nx \l__wudl_result_format_tl { \l__wudl_current_segment_tl }
+        \tl_clear:N \l__wudl_current_segment_tl
+        \bool_set_true:N \l__wudl_in_escape_bool
+      }
+      {
+        % 如果已经在逃逸状态，则将其视为普通字符
+        \tl_put_right:Nn \l__wudl_current_segment_tl {#1}
+      }
+    }
+    {
+      \tl_if_eq:nnTF {#1} { \c__wudl_escape_end_tl }
+      {
+        % 如果遇到结束逃逸字符
+        \bool_if:NT \l__wudl_in_escape_bool
+        {
+          % 将逃逸内容作为 __wudl_escaped_text:n 参数
+          \tl_put_right:Nn \l__wudl_result_format_tl { \exp_not:n { \__wudl_escaped_text:n { \exp_not:V \l__wudl_current_segment_tl } } }
+          \tl_clear:N \l__wudl_current_segment_tl
+          \bool_set_false:N \l__wudl_in_escape_bool
+        }
+        {
+          % 如果不在逃逸状态，则将其视为普通字符
+          \tl_put_right:Nn \l__wudl_current_segment_tl {#1}
+        }
+      }
+      {
+        % 普通字符直接添加
+        \tl_put_right:Nn \l__wudl_current_segment_tl {#1}
+      }
+    }
+    
+    % 继续处理下一个字符
+    \__wudl_parse_char:w #2 \q_stop
+  }
+}
+
 \cs_new_protected:Npn \wudl_parse_dateformat:n #1
   {
     \tl_set:Nn \l__wudl_date_format_tl {#1}
+    
+    % 先处理逃逸字符
+    \__wudl_process_escapes:N \l__wudl_date_format_tl
+    
+    % 然后进行正常的替换
     \tl_replace_all:Nnn \l__wudl_date_format_tl { dd }
       { \__wudl_format_date_double_digit:n { ##3 } }
     \tl_replace_all:Nnn \l__wudl_date_format_tl { d }
       { \__wudl_format_date_single_digit:n { ##3 } }
+    % 新增：添加序数后缀上标
+    \tl_replace_all:Nnn \l__wudl_date_format_tl { t }
+      { \__wudl_format_date_ordinal_suffix:n { ##3 } }
     \tl_replace_all:Nnn \l__wudl_date_format_tl { mmmm }
       { \__wudl_format_date_mmmm:n { ##2 } }
     \tl_replace_all:Nnn \l__wudl_date_format_tl { mmm }
