@@ -1,0 +1,9 @@
+\defaultfontfeatures[HelveticaNeue]
+{
+    Path = ./font/,
+    Extension = .otf,
+    UprightFont = *-Roman,
+    BoldFont = *-Bold,
+    ItalicFont = *-Italic,
+    BoldItalicFont = *-BoldItalic
+}

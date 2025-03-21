@@ -1,0 +1,7 @@
+\defaultfontfeatures[SFMonoSC]
+{
+    Path = ./font/,
+    Extension = .ttf,
+    UprightFont = *-Regular,
+    BoldFont = *-Bold
+}

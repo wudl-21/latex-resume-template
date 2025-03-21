@@ -1,0 +1,5 @@
+\defaultfontfeatures[FZHei]
+{
+    Path = ./font/,
+    Extension = .ttf,
+}
