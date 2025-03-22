@@ -189,12 +189,12 @@
     \ifdefvoid{\Exp@title}{}{\begin{minipage}[t]{\textwidth}
         \ifdefvoid{\Exp@startTime}{\parbox[t]{1\textwidth}{\sffamily{\Exp@title}}}{
         \parbox[t]{0.7\textwidth}{\sffamily{\Exp@title}} \hfill
-        \parbox[t]{0.3\textwidth}{\raggedleft \expandafter\DateFormat\expandafter{\Module@dateFormat}\expandafter\Date\expandafter{\Exp@startTime} -- \expandafter\DateFormat\expandafter{\Module@dateFormat}\expandafter\Date\expandafter{\Exp@endTime}}}%
+        \parbox[t]{0.3\textwidth}{\raggedleft \Exp@locale}}%
     \end{minipage}}
     \ifdefvoid{\Exp@subtitle}{}{
         \begin{minipage}[t]{\textwidth}
             \parbox[t]{0.7\textwidth}{\itshape \Exp@subtitle} \hfill
-            \parbox[t]{0.3\textwidth}{\raggedleft \Exp@locale}
+            \parbox[t]{0.3\textwidth}{\raggedleft \expandafter\DateFormat\expandafter{\Module@dateFormat}\expandafter\Date\expandafter{\Exp@startTime} -- \expandafter\DateFormat\expandafter{\Module@dateFormat}\expandafter\Date\expandafter{\Exp@endTime}}
         \end{minipage}
     }
     \begin{itemize}[leftmargin=*,nosep,topsep=0pt]
