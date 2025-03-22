@@ -45,10 +45,10 @@
 
 % ━━━━━━━ 页面布局 ━━━━━━━
 \geometry{
-    top=1cm,
-    bottom=1cm,
-    left=2cm,
-    right=2cm,
+    top=0.5in,
+    bottom=0.67in,
+    left=0.5in,
+    right=0.5in,
     headheight=0pt,
     footskip=0pt
 }
