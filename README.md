@@ -1,4 +1,4 @@
-**以其他语言阅读: [English](README_en.md) | [中文](README_zh.md)**
+**以其他语言阅读: [English](README.md) | [中文](README_zh.md)**
 
 # LaTeX Resume Template
 
