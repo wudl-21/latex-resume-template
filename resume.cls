@@ -90,6 +90,8 @@
 \DeclareStringOption[1.0]{tableLineSpacing}
 \DeclareStringOption[0cm]{indent}
 \DeclareStringOption[1em]{paragraphSpacing}
+\DeclareStringOption[2pt]{moduleSpacing}
+\DeclareStringOption[4pt]{expSpacing}
 % 设置默认值
 \setkeys{layoutinfo}{}
 % 定义布局命令
@@ -164,7 +166,7 @@
 
 % 经历环境设定
 \titleformat{\section}[block]{\Large\sffamily}{}{0pt}{}[\titlerule]
-\titlespacing{\section}{0pt}{2pt}{6pt}%缩进距离、上间距、下间距
+\titlespacing{\section}{0pt}{\LayoutInfo@moduleSpacing}{6pt}%缩进距离、上间距、下间距
 \newenvironment{module}[1][]{
     \setkeys{module}{#1}
     \section*{\Module@title}
@@ -199,7 +201,7 @@
     \begin{itemize}[leftmargin=*,nosep,topsep=0pt]
         #2
     \end{itemize}
-    \vspace{4pt}
+    \vspace{\LayoutInfo@expSpacing}
     \endgroup
 }
 
