@@ -177,6 +177,7 @@
     family=exp,
     prefix=Exp@
 }
+\DeclareBoolOption[true]{visible}
 \DeclareStringOption[]{title}
 \DeclareStringOption[]{startTime}
 \DeclareStringOption[]{endTime}
@@ -187,21 +188,24 @@
 \NewDocumentCommand{\MakeExp}{O{} m}{
     \begingroup
     \setkeys{exp}{#1}
-    \noindent
-    \ifdefvoid{\Exp@title}{}{\begin{minipage}[t]{\textwidth}
-        \ifdefvoid{\Exp@locale}{\parbox[t]{1\textwidth}{\sffamily{\Exp@title}}}{
-        \parbox[t]{0.7\textwidth}{\sffamily{\Exp@title}} \hfill
-        \parbox[t]{0.3\textwidth}{\raggedleft \Exp@locale}}%
-    \end{minipage}}
-    \ifdefvoid{\Exp@subtitle}{}{\begin{minipage}[t]{\textwidth}
-        \ifdefvoid{\Exp@startTime}{\parbox[t]{1\textwidth}{\itshape \Exp@subtitle}}{
-        \parbox[t]{0.7\textwidth}{\itshape \Exp@subtitle} \hfill
-        \parbox[t]{0.3\textwidth}{\raggedleft \expandafter\DateFormat\expandafter{\Module@dateFormat}\expandafter\Date\expandafter{\Exp@startTime} -- \expandafter\DateFormat\expandafter{\Module@dateFormat}\expandafter\Date\expandafter{\Exp@endTime}}}%
-    \end{minipage}}
-    \begin{itemize}[leftmargin=*,nosep,topsep=0pt]
-        #2
-    \end{itemize}
-    \vspace{\LayoutInfo@expSpacing}
+    \ifbool{Exp@visible}{%
+        % Normal execution when visible=true
+        \noindent
+        \ifdefvoid{\Exp@title}{}{\begin{minipage}[t]{\textwidth}
+            \ifdefvoid{\Exp@locale}{\parbox[t]{1\textwidth}{\sffamily{\Exp@title}}}{
+            \parbox[t]{0.7\textwidth}{\sffamily{\Exp@title}} \hfill
+            \parbox[t]{0.3\textwidth}{\raggedleft \Exp@locale}}%
+        \end{minipage}}
+        \ifdefvoid{\Exp@subtitle}{}{\begin{minipage}[t]{\textwidth}
+            \ifdefvoid{\Exp@startTime}{\parbox[t]{1\textwidth}{\itshape \Exp@subtitle}}{
+            \parbox[t]{0.7\textwidth}{\itshape \Exp@subtitle} \hfill
+            \parbox[t]{0.3\textwidth}{\raggedleft \expandafter\DateFormat\expandafter{\Module@dateFormat}\expandafter\Date\expandafter{\Exp@startTime} -- \expandafter\DateFormat\expandafter{\Module@dateFormat}\expandafter\Date\expandafter{\Exp@endTime}}}%
+        \end{minipage}}
+        \begin{itemize}[leftmargin=*,nosep,topsep=0pt]
+            #2
+        \end{itemize}
+        \vspace{\LayoutInfo@expSpacing}
+    }{}% Skip everything when visible=false
     \endgroup
 }
 
