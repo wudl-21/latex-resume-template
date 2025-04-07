@@ -2,25 +2,33 @@
     title=工作经历,
     dateFormat=yyyy年m月]
 
-\MakeExp[%
-    title=Google,
-    startTime=2024-06-03,
-    endTime=至今,
-    subtitle=软件工程师,
-    locale=硅谷
-]{
-    \item 参与TensorFlow开发
-    \item 负责模型优化
-}
-
-\MakeExp[%
-    title=Microsoft,
-    startTime=2023-06-03,
-    endTime=2024-06-03,
-    subtitle=实习生,
-    locale=西雅图
-]{
-    \item 参与Azure云计算项目
-    \item 获得优秀实习生奖
-}
+    \MakeExp[
+        title=ABC公司,
+        subtitle=软件工程师,
+        startTime=2023-01-01,
+        endTime=2023-12-31,
+        locale=北京,
+        type={技术;开发}
+    ]{
+        \item 这段经历不会显示，因为type没有交集
+    }
+    \MakeExp[
+        title=XYZ公司,
+        subtitle=数据分析师,
+        startTime=2022-01-01,
+        endTime=2022-12-31,
+        locale=上海,
+        type={技术;商分}
+    ]{
+        \item 这段经历会显示，因为type有交集
+    }
+    \MakeExp[
+        title=DEF公司,
+        subtitle=产品经理,
+        startTime=2021-01-01,
+        endTime=2021-12-31,
+        locale=深圳,
+    ]{
+        \item 这段经历会显示，因为没有指定type
+    }
 \end{module}

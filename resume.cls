@@ -42,6 +42,7 @@
 \RequirePackage{fontspec}     % 字体设置
 \RequirePackage{graphicx}   % 图片插入
 \RequirePackage{setspace}     % 行间距设置
+\RequirePackage{pgffor}       % 循环处理
 
 % ━━━━━━━ 页面布局 ━━━━━━━
 \geometry{
@@ -75,6 +76,8 @@
 % ┗━━━━━━━━━━━━━━━━━━━━━┛
 % ━━━━━━━ 日期格式转换 ━━━━━━━
 \input{command/date}
+% ━━━━━━━ 交集检查 ━━━━━━━
+\input{command/check_intersection} % 检查两个逗号分隔列表是否有交集的辅助命令
 
 
 % ┏━━━━━━━━━━━━━━━━━━━━━┓
@@ -120,6 +123,17 @@
 % 设置默认值
 \setkeys{figinfo}{}
 
+% ━━━━━━━ 岗位类型设定 ━━━━━━━
+\SetupKeyvalOptions{
+    family=jobinfo,
+    prefix=JobInfo@
+}
+\DeclareStringOption[]{type}
+\setkeys{jobinfo}{}
+
+\NewDocumentCommand{\JobInfo}{O{}}{
+    \setkeys{jobinfo}{#1}
+}
 
 % ━━━━━━━ 个人信息 ━━━━━━━
 \SetupKeyvalOptions{
@@ -177,36 +191,54 @@
     family=exp,
     prefix=Exp@
 }
-\DeclareBoolOption[true]{visible}
 \DeclareStringOption[]{title}
 \DeclareStringOption[]{startTime}
 \DeclareStringOption[]{endTime}
 \DeclareStringOption[]{subtitle}
 \DeclareStringOption[]{locale}
+\DeclareStringOption[]{type}
 \setkeys{exp}{}
 
 \NewDocumentCommand{\MakeExp}{O{} m}{
     \begingroup
     \setkeys{exp}{#1}
-    \ifbool{Exp@visible}{%
-        % Normal execution when visible=true
-        \noindent
-        \ifdefvoid{\Exp@title}{}{\begin{minipage}[t]{\textwidth}
-            \ifdefvoid{\Exp@locale}{\parbox[t]{1\textwidth}{\sffamily{\Exp@title}}}{
-            \parbox[t]{0.7\textwidth}{\sffamily{\Exp@title}} \hfill
-            \parbox[t]{0.3\textwidth}{\raggedleft \Exp@locale}}%
-        \end{minipage}}
-        \ifdefvoid{\Exp@subtitle}{}{\begin{minipage}[t]{\textwidth}
-            \ifdefvoid{\Exp@startTime}{\parbox[t]{1\textwidth}{\itshape \Exp@subtitle}}{
-            \parbox[t]{0.7\textwidth}{\itshape \Exp@subtitle} \hfill
-            \parbox[t]{0.3\textwidth}{\raggedleft \expandafter\DateFormat\expandafter{\Module@dateFormat}\expandafter\Date\expandafter{\Exp@startTime} -- \expandafter\DateFormat\expandafter{\Module@dateFormat}\expandafter\Date\expandafter{\Exp@endTime}}}%
-        \end{minipage}}
-        \begin{itemize}[leftmargin=*,nosep,topsep=0pt]
-            #2
-        \end{itemize}
-        \vspace{\LayoutInfo@expSpacing}
-    }{}% Skip everything when visible=false
+    % 检查是否需要显示此经历条目
+    \ifdefvoid{\Exp@type}{%
+        % 如果经历条目没有指定type，则显示
+        \MakeExpContent{#2}%
+    }{%
+        \ifdefvoid{\JobInfo@type}{%
+            % 如果JobInfo没有指定type，则显示所有条目
+            \MakeExpContent{#2}%
+        }{%
+            % 检查JobInfo的type和当前经历条目的type是否有交集
+            \makeatletter\CheckIntersection{\Exp@type}{\JobInfo@type}\makeatother
+            \ifnum\GetIntersection=1
+                % 如果有交集，则显示经历条目
+                \MakeExpContent{#2}%
+            \fi
+        }%
+    }%
     \endgroup
+}
+
+% 将原先的内容部分拆分为单独的命令
+\newcommand{\MakeExpContent}[1]{%
+    \noindent
+    \ifdefvoid{\Exp@title}{}{\begin{minipage}[t]{\textwidth}
+        \ifdefvoid{\Exp@locale}{\parbox[t]{1\textwidth}{\sffamily{\Exp@title}}}{
+        \parbox[t]{0.7\textwidth}{\sffamily{\Exp@title}} \hfill
+        \parbox[t]{0.3\textwidth}{\raggedleft \Exp@locale}}%
+    \end{minipage}}
+    \ifdefvoid{\Exp@subtitle}{}{\begin{minipage}[t]{\textwidth}
+        \ifdefvoid{\Exp@startTime}{\parbox[t]{1\textwidth}{\itshape \Exp@subtitle}}{
+        \parbox[t]{0.7\textwidth}{\itshape \Exp@subtitle} \hfill
+        \parbox[t]{0.3\textwidth}{\raggedleft \expandafter\DateFormat\expandafter{\Module@dateFormat}\expandafter\Date\expandafter{\Exp@startTime} -- \expandafter\DateFormat\expandafter{\Module@dateFormat}\expandafter\Date\expandafter{\Exp@endTime}}}%
+    \end{minipage}}
+    \begin{itemize}[leftmargin=*,nosep,topsep=0pt]
+        #1
+    \end{itemize}
+    \vspace{\LayoutInfo@expSpacing}
 }
 
 % ━━━━━━━ 列表条目命令 ━━━━━━━
