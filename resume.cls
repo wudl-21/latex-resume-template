@@ -184,7 +184,7 @@
     \ifdefvoid{\Profile@photo}{}{%
         \begin{minipage}[c]{0.25\textwidth}
             \raggedleft
-            \includegraphics[height=3cm]{\FigInfo@path\Profile@photo}
+            \includegraphics[height=8em]{\FigInfo@path\Profile@photo}
         \end{minipage}%
     }
     \endgroup
