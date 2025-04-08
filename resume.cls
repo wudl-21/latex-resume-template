@@ -14,7 +14,7 @@
 \DeclareOption{en}      % 使用英语
 {
     \@UsingEnglishtrue
-    \PassOptionsToPackage{scheme=plain}{ctex}   % 阻止 ctex 宏包过度汉化
+    \PassOptionsToPackage{scheme=plain}{ctex}   % 阻止ctex宏包过度汉化
 }
 \ProcessOptions\relax
 
@@ -22,7 +22,7 @@
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
 \ProcessOptions\relax
 
-\LoadClass[a4paper, 10pt]{article}   % 加载纸张尺寸=A4，字号=10，...，的 article 类
+\LoadClass[a4paper]{article}   % 加载article类
 %%━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
@@ -30,7 +30,7 @@
 % ┃       调用宏包      ┃
 % ┗━━━━━━━━━━━━━━━━━━━━━┛
 \RequirePackage[UTF8]{ctex} % 中文支持
-\RequirePackage{fix-cm}     % 允许修改字体大小
+\RequirePackage{fix-cm}     % CM字体修正，允许使用非标准字号
 \RequirePackage{xparse}       % 复杂命令定义
 \RequirePackage{kvoptions}    % 键值对解析
 \RequirePackage{enumitem}     % 列表控制
@@ -42,7 +42,7 @@
 \RequirePackage{fontspec}     % 字体设置
 \RequirePackage{graphicx}   % 图片插入
 \RequirePackage{setspace}     % 行间距设置
-\RequirePackage{pgffor}       % 循环处理
+\RequirePackage{fontscale}   % 字体缩放
 
 % ━━━━━━━ 页面布局 ━━━━━━━
 \geometry{
@@ -57,21 +57,6 @@
 
 
 % ┏━━━━━━━━━━━━━━━━━━━━━┓
-% ┃         字体        ┃
-% ┗━━━━━━━━━━━━━━━━━━━━━┛
-%% 常规
-\setmonofont{SFMonoSC}      % 设定等宽字体
-\setsansfont{HelveticaNeue}  % 设定无衬线字体
-\setCJKsansfont{FZHei}[ % 中文无衬线字体
-    AutoFakeSlant = 0.15    % 伪斜体修正（可选）
-]
-\setCJKmonofont{SFMonoSC}[ % 中文等宽字体
-    AutoFakeSlant = 0.15    % 伪斜体修正（可选）
-]
-%━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-
-% ┏━━━━━━━━━━━━━━━━━━━━━┓
 % ┃      自定义命令     ┃
 % ┗━━━━━━━━━━━━━━━━━━━━━┛
 % ━━━━━━━ 日期格式转换 ━━━━━━━
@@ -83,6 +68,7 @@
 % ┏━━━━━━━━━━━━━━━━━━━━━┓
 % ┃       键值设定      ┃
 % ┗━━━━━━━━━━━━━━━━━━━━━┛
+\makeatletter
 % ━━━━━━━ 布局设定 ━━━━━━━
 \SetupKeyvalOptions{
     family=layoutinfo,
@@ -105,6 +91,41 @@
     \renewcommand{\arraystretch}{\LayoutInfo@tableLineSpacing}
     \setlength{\parindent}{\LayoutInfo@indent}
     \setlength{\parskip}{\LayoutInfo@paragraphSpacing}
+}
+
+% ━━━━━━━ 字体设定 ━━━━━━━
+\SetupKeyvalOptions{
+    family=fontinfo,
+    prefix=FontInfo@
+}
+\DeclareStringOption[10pt]{normalSize} % 基础字号
+\DeclareStringOption[1.2]{baselineSkipScale} % 基线间距缩放
+\DeclareStringOption[1.2]{titleScale} % 文头字号缩放
+\DeclareStringOption[1.5]{sectionScale} % 模块标题字号缩放
+\DeclareStringOption[SFMonoSC]{monoFont}
+\DeclareStringOption[HelveticaNeue]{sansFont}
+\DeclareStringOption[FZHei]{sansCJKFont}
+\DeclareStringOption[SFMonoSC]{monoCJKFont}
+% 设置默认值
+\setkeys{fontinfo}{}
+
+\newcommand{\FontInfo}[1][]{
+    \setkeys{fontinfo}{#1} % 应用参数
+
+    % 设置字体
+    \setmonofont{\FontInfo@monoFont}      % 设定等宽字体
+    \setsansfont{\FontInfo@sansFont}  % 设定无衬线字体
+    \setCJKsansfont{\FontInfo@sansCJKFont}[ % 中文无衬线字体
+        AutoFakeSlant = 0.15    % 伪斜体修正（可选）
+    ]
+    \setCJKmonofont{\FontInfo@monoCJKFont}[ % 中文等宽字体
+        AutoFakeSlant = 0.15    % 伪斜体修正（可选）
+    ]
+    \fontscalesetup{
+        normalsize/size = \FontInfo@normalSize, % 使用基础字号比例
+        baselineskip-size-ratio = \FontInfo@baselineSkipScale, % 行距比例
+        typographic-scale = musical, % 使用音乐音阶比例 
+    }
 }
 
 % ━━━━━━━ 图片路径设定 ━━━━━━━
@@ -152,7 +173,7 @@
     \setkeys{profile}{#1}
     \noindent
     \begin{minipage}[c]{\ifdefvoid{\Profile@photo}{1\textwidth}{0.75\textwidth}}
-        {\Huge\sffamily\Profile@name}
+        {\scalefont{\FontInfo@titleScale}\sffamily\Profile@name}
         
         \vspace{0.5em}
         
@@ -179,8 +200,8 @@
 \setkeys{module}{}
 
 % 经历环境设定
-\titleformat{\section}[block]{\Large\sffamily}{}{0pt}{}[\titlerule]
-\titlespacing{\section}{0pt}{\LayoutInfo@moduleSpacing}{6pt}%缩进距离、上间距、下间距
+\titleformat{\section}[block]{\scalefont{\FontInfo@sectionScale}\sffamily}{}{0pt}{}[\titlerule]
+\titlespacing{\section}{0pt}{\LayoutInfo@moduleSpacing}{1ex}%缩进距离、上间距、下间距
 \newenvironment{module}[1][]{
     \setkeys{module}{#1}
     \section*{\Module@title}
@@ -258,3 +279,5 @@
     \end{minipage}
     \endgroup
 }
+
+\makeatother
