@@ -1,6 +1,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{resume}
 
+\makeatletter
 % ┏━━━━━━━━━━━━━━━━━━━━━┓
 % ┃         选项        ┃
 % ┗━━━━━━━━━━━━━━━━━━━━━┛
@@ -47,7 +48,7 @@
 % ━━━━━━━ 页面布局 ━━━━━━━
 \geometry{
     top=0.5in,
-    bottom=0.67in,
+    bottom=0.5in,
     left=0.5in,
     right=0.5in,
     headheight=0pt,
@@ -68,7 +69,6 @@
 % ┏━━━━━━━━━━━━━━━━━━━━━┓
 % ┃       键值设定      ┃
 % ┗━━━━━━━━━━━━━━━━━━━━━┛
-\makeatletter
 % ━━━━━━━ 布局设定 ━━━━━━━
 \SetupKeyvalOptions{
     family=layoutinfo,
@@ -149,7 +149,13 @@
     family=jobinfo,
     prefix=JobInfo@
 }
+\DeclareStringOption[]{name}
 \DeclareStringOption[]{type}
+\if@UsingEnglish
+    \DeclareStringOption[Job Target:]{caption}
+\else
+    \DeclareStringOption[意向职位：]{caption}
+\fi
 \setkeys{jobinfo}{}
 
 \NewDocumentCommand{\JobInfo}{O{}}{
@@ -162,9 +168,10 @@
     prefix=Profile@
 }
 \DeclareStringOption[]{name}
-\DeclareStringOption[]{email}
+\DeclareStringOption[]{contactFirst}
+\DeclareStringOption[]{contactSecond}
+\DeclareStringOption[]{contactThird}
 \DeclareStringOption[]{link}
-\DeclareStringOption[]{phone}
 \DeclareStringOption[]{photo}
 \setkeys{profile}{}
 
@@ -174,11 +181,16 @@
     \noindent
     \begin{minipage}[c]{\ifdefvoid{\Profile@photo}{1\textwidth}{0.75\textwidth}}
         {\scalefont{\FontInfo@titleScale}\sffamily\Profile@name}
-        
+
         \vspace{0.5em}
-        
-        \ifdefvoid{\Profile@email}{}{{\Profile@email}\quad}
-        \ifdefvoid{\Profile@phone}{}{{\Profile@phone}\quad}
+
+        \ifdefvoid{\JobInfo@name}{}{{\sffamily\JobInfo@caption }{\JobInfo@name}}
+
+        \vspace{0.25em}
+
+        \ifdefvoid{\Profile@contactFirst}{}{{\Profile@contactFirst}\quad}
+        \ifdefvoid{\Profile@contactSecond}{}{{\Profile@contactSecond}\quad}
+        \ifdefvoid{\Profile@contactThird}{}{{\Profile@contactThird}\quad}
         \ifdefvoid{\Profile@link}{}{\href{https://\Profile@link}{\Profile@link}}
     \end{minipage}%
     \ifdefvoid{\Profile@photo}{}{%
